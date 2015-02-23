@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import time
-from Adafruit_I2C import Adafruit_I2C
+import smbus
 
 # ===========================================================================
 # ST_VL6180x ToF ranger Class
@@ -9,9 +9,6 @@ from Adafruit_I2C import Adafruit_I2C
 # Originally written by A. Weber
 # References Arduino library by Casey Kuhns of SparkFun:
 # https://github.com/sparkfun/ToF_Range_Finder-VL6180_Library\
-#
-# Requires Adafruit I2C library:
-# https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code/tree/master/Adafruit_I2C
 # ===========================================================================
 
 
@@ -118,7 +115,9 @@ class VL6180X:
         # whereas new Pis use SMBus 1.  If you see an error like:
         # 'Error accessing 0x29: Check your I2C address '
         # change the SMBus number in the initializer below!
-        self.i2c = Adafruit_I2C(address)
+
+        # setup i2c bus and SFR address
+        self.i2c = smbus.SMBus(1)
         self.address = address
         self.debug = debug
 
@@ -362,15 +361,28 @@ class VL6180X:
         return als_calculated
 
     def get_register(self, register_address):
-        data = self.i2c.readList(register_address, 1)
-        return data[0] & 0xFF
+        a1 = (register_address >> 8) & 0xFF
+        a0 = register_address & 0xFF
+        self.i2c.write_i2c_block_data(self.address, a1, [a0])
+        data = self.i2c.read_byte(self.address)
+        return data
 
     def get_register_16bit(self, register_address):
-        data = self.i2c.readList(register_address, 2)
-        return (data[0] << 8) | (data[1] & 0xFF)
+        a1 = (register_address >> 8) & 0xFF
+        a0 = register_address & 0xFF
+        self.i2c.write_i2c_block_data(self.address, a1, [a0])
+        data0 = self.i2c.read_byte(self.address)
+        data1 = self.i2c.read_byte(self.address)
+        return (data0 << 8) | (data1 & 0xFF)
 
     def set_register(self, register_address, data):
-        self.i2c.write8(register_address, data & 0xFF)
+        a1 = (register_address >> 8) & 0xFF
+        a0 = register_address & 0xFF
+        self.i2c.write_i2c_block_data(self.address, a1, [a0, (data & 0xFF)])
 
     def set_register_16bit(self, register_address, data):
-        self.i2c.write16(register_address, data)
+        a1 = (register_address >> 8) & 0xFF
+        a0 = register_address & 0xFF
+        d1 = (data >> 8) & 0xFF
+        d0 = data & 0xFF
+        self.i2c.write_i2c_block_data(self.address, a1, [a0, d1, d0])
