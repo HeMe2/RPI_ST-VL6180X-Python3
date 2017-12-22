@@ -1,8 +1,11 @@
-# 310weber's ST VL6180X Python Library #
-A python library and test script to use the ST VL6180X time-of-flight (TOF) / ambient light sensor (ALS) with a Raspberry Pi
+# Python 3 port of 310weber's ST VL6180X Python Library #
+
+A python 3 port of the handy ST VL6180X library written by Arnie Weber. A test script to use the ST VL6180X time-of-flight (TOF) / ambient light sensor (ALS) with a Raspberry Pi is included in the test folder.
 
 * Make sure you have i2c enabled and python-rpi.gpio installed on your raspberry pi.
 * The VL6180X is a 2.8 V device - make sure you use a level shifter between the sensor and the 3.3 V Raspberry Pi GPIOs
+
+Link to the original project: https://bitbucket.org/310weber/st_vl6180x/src
 
 Written by Arnie Weber.  BSD license, all text above and below must be included in any redistribution
 
