@@ -171,36 +171,36 @@ class VL6180X:
         self.set_register(0x0030, 0x00)
         if self.debug:
             print("Register settings:")
-            print("0x0207 - %x", self.get_register(0x0207))
-            print("0x0208 - %x", self.get_register(0x0208))
-            print("0x0096 - %x", self.get_register(0x0096))
-            print("0x0097 - %x", self.get_register(0x0097))
-            print("0x00e3 - %x", self.get_register(0x00e3))
-            print("0x00e4 - %x", self.get_register(0x00e4))
-            print("0x00e5 - %x", self.get_register(0x00e5))
-            print("0x00e6 - %x", self.get_register(0x00e6))
-            print("0x00e7 - %x", self.get_register(0x00e7))
-            print("0x00f5 - %x", self.get_register(0x00f5))
-            print("0x00d9 - %x", self.get_register(0x00d9))
-            print("0x00db - %x", self.get_register(0x00db))
-            print("0x00dc - %x", self.get_register(0x00dc))
-            print("0x00dd - %x", self.get_register(0x00dd))
-            print("0x009f - %x", self.get_register(0x009f))
-            print("0x00a3 - %x", self.get_register(0x00a3))
-            print("0x00b7 - %x", self.get_register(0x00b7))
-            print("0x00bb - %x", self.get_register(0x00bb))
-            print("0x00b2 - %x", self.get_register(0x00b2))
-            print("0x00ca - %x", self.get_register(0x00ca))
-            print("0x0198 - %x", self.get_register(0x0198))
-            print("0x01b0 - %x", self.get_register(0x01b0))
-            print("0x01ad - %x", self.get_register(0x01ad))
-            print("0x00ff - %x", self.get_register(0x00ff))
-            print("0x0100 - %x", self.get_register(0x0100))
-            print("0x0199 - %x", self.get_register(0x0199))
-            print("0x01a6 - %x", self.get_register(0x01a6))
-            print("0x01ac - %x", self.get_register(0x01ac))
-            print("0x01a7 - %x", self.get_register(0x01a7))
-            print("0x0030 - %x", self.get_register(0x0030))
+            print("0x0207 - {:x}".format(self.get_register(0x0207)))
+            print("0x0208 - {:x}".format(self.get_register(0x0208)))
+            print("0x0096 - {:x}".format(self.get_register(0x0096)))
+            print("0x0097 - {:x}".format(self.get_register(0x0097)))
+            print("0x00e3 - {:x}".format(self.get_register(0x00e3)))
+            print("0x00e4 - {:x}".format(self.get_register(0x00e4)))
+            print("0x00e5 - {:x}".format(self.get_register(0x00e5)))
+            print("0x00e6 - {:x}".format(self.get_register(0x00e6)))
+            print("0x00e7 - {:x}".format(self.get_register(0x00e7)))
+            print("0x00f5 - {:x}".format(self.get_register(0x00f5)))
+            print("0x00d9 - {:x}".format(self.get_register(0x00d9)))
+            print("0x00db - {:x}".format(self.get_register(0x00db)))
+            print("0x00dc - {:x}".format(self.get_register(0x00dc)))
+            print("0x00dd - {:x}".format(self.get_register(0x00dd)))
+            print("0x009f - {:x}".format(self.get_register(0x009f)))
+            print("0x00a3 - {:x}".format(self.get_register(0x00a3)))
+            print("0x00b7 - {:x}".format(self.get_register(0x00b7)))
+            print("0x00bb - {:x}".format(self.get_register(0x00bb)))
+            print("0x00b2 - {:x}".format(self.get_register(0x00b2)))
+            print("0x00ca - {:x}".format(self.get_register(0x00ca)))
+            print("0x0198 - {:x}".format(self.get_register(0x0198)))
+            print("0x01b0 - {:x}".format(self.get_register(0x01b0)))
+            print("0x01ad - {:x}".format(self.get_register(0x01ad)))
+            print("0x00ff - {:x}".format(self.get_register(0x00ff)))
+            print("0x0100 - {:x}".format(self.get_register(0x0100)))
+            print("0x0199 - {:x}".format(self.get_register(0x0199)))
+            print("0x01ac - {:x}".format(self.get_register(0x01ac)))
+            print("0x01a6 - {:x}".format(self.get_register(0x01a6)))
+            print("0x01a7 - {:x}".format(self.get_register(0x01a7)))
+            print("0x0030 - {:x}".format(self.get_register(0x0030)))
 
     def default_settings(self):
         # Recommended settings from datasheet
@@ -239,7 +239,7 @@ class VL6180X:
 
         if self.debug:
             print("Default settings:")
-            print("SYSTEM_MODE_GPIO1 - %x", self.get_register(self.__VL6180X_SYSTEM_MODE_GPIO1))
+            print("SYSTEM_MODE_GPIO1 - {:x}".format(self.get_register(self.__VL6180X_SYSTEM_MODE_GPIO1)))
             print("READOUT_AVERAGING_SAMPLE_PERIOD - %x", self.get_register(
                       self.__VL6180X_READOUT_AVERAGING_SAMPLE_PERIOD))
             print("SYSALS_ANALOGUE_GAIN - %x", self.get_register(self.__VL6180X_SYSALS_ANALOGUE_GAIN))
@@ -343,6 +343,12 @@ class VL6180X:
             0.32 * (als_raw / als_gain_actual) * als_integration_period
 
         return als_calculated
+
+    def set_range_offset(self, offset):
+        self.set_register(self.__VL6180X_SYSRANGE_PART_TO_PART_RANGE_OFFSET, offset)
+
+    def get_range_offset(self):
+        return self.get_register(self.__VL6180X_SYSRANGE_PART_TO_PART_RANGE_OFFSET)
 
     def get_register(self, register_address):
         a1 = (register_address >> 8) & 0xFF
