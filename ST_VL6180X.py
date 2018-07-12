@@ -109,6 +109,42 @@ class VL6180X:
         40:     40.00,     # Nominal gain 40;   actual gain 40
     }
 
+    # Range Error Codes
+    class RangeErrorCodes:
+        NO_ERROR                    = 0b0000
+        VCSEL_CONTINUITY_TEST       = 0b0001
+        VCSEL_WATCHDOG_TEST         = 0b0010
+        VCSEL_WATCHDOG              = 0b0011
+        PLL1_LOCK                   = 0b0100
+        PLL2_LOCK                   = 0b0101
+        EARLY_CONVERGENCE_ESTIMATE  = 0b0110
+        MAX_CONVERGENCE             = 0b0111
+        NO_TARGET_IGNORE            = 0b1000
+        MAX_SIGNAL_TO_NOISE_RATIO   = 0b1011
+        RAW_RANGING_ALGO_UNDERFLOW  = 0b1100
+        RAW_RANGING_ALGO_OVERFLOW   = 0b1101
+        RANGING_ALGO_UNDERFLOW      = 0b1110
+        RANGING_ALGO_OVERFLOW       = 0b1111
+
+    _RANGE_ERROR_CODES_TO_STRINGS = {
+        0b0000: "No error",
+        0b0001: "VCSEL Continuity Test",
+        0b0010: "VCSEL Watchtog Test",
+        0b0011: "VCSEL Watchdog",
+        0b0100: "PLL1 Lock",
+        0b0101: "PLL2 Lock",
+        0b0110: "Early Convergence Estimate",
+        0b0111: "Max Convergence Estimate",
+        0b1000: "No Target Ignore",
+        0b1001: "Not used",
+        0b1010: "Not used",
+        0b1011: "Max Signal to Noise Ratio",
+        0b1100: "Raw Ranging Underflow",
+        0b1101: "Raw Ranging Overflow",
+        0b1110: "Ranging Algo Underflow",
+        0b1111: "Ranging Algo Overflow"
+    }
+
     def __init__(self, address=0x29, debug=False):
         # Depending on if you have an old or a new Raspberry Pi, you
         # may need to change the I2C bus.  Older Pis use SMBus 0,
@@ -303,6 +339,24 @@ class VL6180X:
         self.set_register(self.__VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07)
         return distance
 
+    def get_distance_with_error_checks(self) -> (int, int):
+        # Check whether the device is ready
+        while bool(self.get_register(self.__VL6180X_RESULT_RANGE_STATUS) & 0x01) is False:
+            time.sleep(0.001)  # sleep one millisecond and try again
+        # Start Single shot mode
+        self.set_register(self.__VL6180X_SYSRANGE_START, 0x01)
+        # Wait for range measurement to complete
+        time.sleep(0.010)  # measurement will not be finished that fast, so sleep a little
+        while bool(self.get_register(self.__VL6180X_RESULT_INTERRUPT_STATUS_GPIO) & 0x04) is False:
+            time.sleep(0.001)  # sleep one millisecond and try again
+        # Read range result
+        distance = self.get_register(self.__VL6180X_RESULT_RANGE_VAL)
+        # Read status code
+        status = self.get_range_status()
+        # Clear interrupt flag
+        self.set_register(self.__VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07)
+        return distance, status
+
     def get_ambient_light(self, als_gain):
         # First load in Gain we are using, do it every time in case someone
         # changes it on us.
@@ -349,6 +403,15 @@ class VL6180X:
 
     def get_range_offset(self):
         return self.get_register(self.__VL6180X_SYSRANGE_PART_TO_PART_RANGE_OFFSET)
+
+    def get_range_status(self) -> int:
+        reg = self.get_register(self.__VL6180X_RESULT_RANGE_STATUS)
+        return (reg & 0xF0) >> 4
+
+    def get_range_status_string(self, status=0xFF00) -> str:
+        if status is 0xFF00:
+            status = self.get_range_status()
+        return self._RANGE_ERROR_CODES_TO_STRINGS.get(status)
 
     def get_register(self, register_address):
         a1 = (register_address >> 8) & 0xFF
