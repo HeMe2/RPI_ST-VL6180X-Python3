@@ -409,7 +409,7 @@ class VL6180X:
         return (reg & 0xF0) >> 4
 
     def get_range_status_string(self, status=0xFF00) -> str:
-        if status is 0xFF00:
+        if status == 0xFF00:
             status = self.get_range_status()
         return self._RANGE_ERROR_CODES_TO_STRINGS.get(status)
 
